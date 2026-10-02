@@ -1,0 +1,2 @@
+node --check app/static/playground.js
+Exit 0; no syntax errors.

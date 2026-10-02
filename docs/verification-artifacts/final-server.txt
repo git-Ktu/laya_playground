@@ -1,0 +1,19 @@
+INFO:     Started server process [32634]
+INFO:     Waiting for application startup.
+model=multilingual model_id=convaiinnovations/laya-multilingual requested_device=cuda loading
+startup model=multilingual cuda_available=True gpu_name=NVIDIA GeForce GTX 1070 requested_device=cuda compute_capability=[6, 1] torch_arch_list=['sm_50', 'sm_60', 'sm_70', 'sm_75', 'sm_80', 'sm_86', 'sm_90']
+Fetching 5 files:   0%|          | 0/5 [00:00<?, ?it/s]Fetching 5 files: 100%|██████████| 5/5 [00:00<00:00, 2076.18it/s]
+model=multilingual device=cuda loaded
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     192.168.1.10:42974 - "GET / HTTP/1.1" 200 OK
+INFO:     192.168.1.10:42974 - "GET /health HTTP/1.1" 200 OK
+INFO:     192.168.1.10:42974 - "GET /info HTTP/1.1" 200 OK
+INFO:     192.168.1.10:42974 - "GET /info HTTP/1.1" 200 OK
+INFO:     192.168.1.10:42974 - "POST /tokenize HTTP/1.1" 200 OK
+model=multilingual device=cuda inference_ms=327.31
+INFO:     192.168.1.10:42974 - "POST /v1/systemone HTTP/1.1" 200 OK
+model=multilingual device=cuda inference_ms=61.70
+INFO:     192.168.1.10:42974 - "POST /v1/systemone/batch HTTP/1.1" 200 OK
+INFO:     192.168.1.10:42974 - "GET /info HTTP/1.1" 200 OK
+INFO:     192.168.1.10:35932 - "GET /health HTTP/1.1" 200 OK

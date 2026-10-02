@@ -1,0 +1,18 @@
+[Unit]
+Description=Laya Playground web application and API server
+StartLimitIntervalSec=300
+StartLimitBurst=3
+
+[Service]
+Type=simple
+WorkingDirectory=%h/work_space/laya_playground
+Environment=HOME=%h
+Environment=PYTHONUNBUFFERED=1
+EnvironmentFile=-%h/.config/laya_playground/server.env
+ExecStart=%h/work_space/laya_playground/.venv/bin/python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 1
+Restart=on-failure
+RestartSec=5s
+TimeoutStopSec=60s
+
+[Install]
+WantedBy=default.target

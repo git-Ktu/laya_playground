@@ -1,0 +1,119 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+________________________ test_edit_run_copy_and_mobile _________________________
+
+browser_page = (<Page url='http://127.0.0.1:53039/'>, <tests.test_api.FakeService object at 0x73d428d72570>)
+tmp_path = PosixPath('/tmp/pytest-of-server/pytest-0/test_edit_run_copy_and_mobile0')
+
+    def test_edit_run_copy_and_mobile(browser_page, tmp_path):
+        page,service=browser_page
+        page.locator('#state').fill("日本語の感想。It's 快適です。")
+        expect(page.locator('#state-count')).to_contain_text('state tokens')
+        assert page.locator('.question').count()==3
+        page.get_by_role('button',name='選択肢を追加',exact=True).click()
+        page.get_by_label('質問 1 レベル 4 説明',exact=True).fill('その他')
+        page.get_by_role('button',name='レベルを追加',exact=True).click()
+        page.get_by_label('質問 2 レベル 4 説明',exact=True).fill('非常に満足')
+        page.locator('#run').click()
+        expect(page.locator('#result-status')).to_have_text('実行完了')
+        assert len(service.calls)==1
+        assert len(service.calls[0][1]['感情']['criteria'])==4
+        assert len(service.calls[0][1]['満足度']['criteria'])==4
+        assert page.locator('.answer').count()==3
+        expect(page.locator('#result-warning')).to_contain_text('切り捨て')
+        page.locator('#raw-details summary').click()
+        expect(page.locator('#raw-json')).to_contain_text('state_tokens_dropped')
+        page.locator('.request summary').click()
+        page.locator('#copy-json').click()
+        expect(page.locator('#copy-status')).to_contain_text('JSON をコピーしました')
+        copied=page.evaluate('navigator.clipboard.readText()')
+        assert '日本語' in copied
+        page.locator('#origin').fill('http://192.168.1.10:8000')
+        page.locator('#copy-curl').click()
+        expect(page.locator('#copy-status')).to_contain_text('curl をコピーしました')
+        curl=page.evaluate('navigator.clipboard.readText()')
+        import shlex,json
+        args=shlex.split(curl)
+        assert args[1]=='http://192.168.1.10:8000/v1/systemone'
+        assert json.loads(args[args.index('--data-raw')+1])['state']=="日本語の感想。It's 快適です。"
+        page.keyboard.press('Control+Enter')
+        expect(page.locator('#result-status')).to_have_text('実行完了')
+        page.wait_for_function('document.querySelector("#answers").getAttribute("aria-busy") === "false"')
+        assert len(service.calls)==2
+        path=Path('/home/server/work_space/.superpowers/sdd/2026-10-01-laya-playground/screenshots')
+        path.mkdir(exist_ok=True)
+        page.screenshot(path=str(path/'desktop.png'),full_page=True)
+        page.set_viewport_size({'width':390,'height':844})
+        assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
+        page.screenshot(path=str(path/'mobile.png'),full_page=True)
+        # Artifacts must belong to this fresh pytest directory, even outside a checkout.
+>       assert (tmp_path / 'desktop.png').read_bytes().startswith(b'\x89PNG\r\n\x1a\n')
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_playground_browser.py:89: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/pathlib.py:1019: in read_bytes
+    with self.open(mode='rb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/tmp/pytest-of-server/pytest-0/test_edit_run_copy_and_mobile0/desktop.png')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytest-of-server/pytest-0/test_edit_run_copy_and_mobile0/desktop.png'
+
+../.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/pathlib.py:1013: FileNotFoundError
+_____ test_default_uvicorn_logs_safe_startup_loading_inference_and_errors ______
+
+    def test_default_uvicorn_logs_safe_startup_loading_inference_and_errors():
+        """Catch disabled application INFO output under the documented server config."""
+        import subprocess
+        import sys
+        script = """
+    import uvicorn
+    uvicorn.Config('app.main:app')
+    from tests.test_service import Router, QUESTIONS
+    from app.main import create_app
+    from app.services.laya_service import LayaService, InferenceError
+    router = Router()
+    service = LayaService(router_factory=lambda: router)
+    create_app(service)
+    service.load()
+    service.predict('PRIVATE_REQUEST_BODY', QUESTIONS)
+    router.error = RuntimeError('PRIVATE_EXCEPTION_CONTENT')
+    try:
+        service.predict('PRIVATE_REQUEST_BODY', QUESTIONS)
+    except InferenceError:
+        pass
+    def broken_factory():
+        raise RuntimeError('PRIVATE_LOADING_EXCEPTION')
+    failed = LayaService(router_factory=broken_factory)
+    failed.load()
+    """
+        result = subprocess.run([sys.executable, '-c', script], capture_output=True, text=True)
+        assert result.returncode == 0, result.stderr
+        output = result.stdout + result.stderr
+>       assert 'startup' in output
+E       AssertionError: assert 'startup' in 'model=multilingual error=inference_error\nmodel=multilingual error=inference_error\n'
+
+tests/test_service.py:178: AssertionError
+=============================== warnings summary ===============================
+.venv/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /home/server/work_space/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_playground_browser.py::test_edit_run_copy_and_mobile - File...
+FAILED tests/test_service.py::test_default_uvicorn_logs_safe_startup_loading_inference_and_errors
+2 failed, 1 warning in 5.42s

@@ -1,0 +1,54 @@
+/* Shared viewport anchors keep page switching under the same pointer. */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  max-width: none;
+  margin: 0;
+  padding: 0 36px;
+  height: auto;
+  min-height: 76px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 218px;
+  grid-template-rows: 76px;
+  align-items: center;
+  gap: 0 24px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+.site-heading { display: contents; }
+.site-heading h1 { grid-column: 1; grid-row: 1; }
+.site-heading p { grid-column: 1 / -1; margin: 0 0 8px; }
+.site-header #model-status { grid-column: 1 / -1; margin: 0 0 18px; }
+.site-header .page-nav {
+  grid-column: 2;
+  grid-row: 1;
+  display: grid;
+  grid-template-columns: 100px 100px;
+  gap: 18px;
+  margin: 0;
+  font-size: 14px;
+  line-height: 24px;
+}
+.site-header .page-nav a {
+  display: block;
+  text-align: center;
+  white-space: nowrap;
+  color: var(--action);
+  text-underline-offset: 4px;
+}
+.site-header .page-nav [aria-current=page] {
+  color: var(--text);
+  font-weight: 700;
+}
+@media (max-width: 800px) {
+  .site-header {
+    padding: 0 18px;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: 60px 44px;
+  }
+  .site-header .page-nav { grid-column: 1; grid-row: 2; justify-self: end; }
+  .guide-header { min-height: 104px; }
+  .chapter-nav { top: 104px; }
+  .guide-layout section, .guide-layout h3 { scroll-margin-top: 173px; }
+}
